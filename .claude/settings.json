@@ -1,0 +1,11 @@
+{
+  "extraKnownMarketplaces": {
+    "dataviz-skills": {
+      "source": { "source": "github", "repo": "holtzy/dataviz-skills" }
+    }
+  },
+  "enabledPlugins": {
+    "dataviz-skills@dataviz-skills": true
+  },
+  "includeCoAuthoredBy": false
+}
