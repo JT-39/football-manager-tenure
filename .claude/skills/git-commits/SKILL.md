@@ -1,6 +1,6 @@
 ---
 name: git-commits
-description: The user's house style for git commits in every project. Commit little and often, write well-explained detailed messages in plain simple language, and add NO Claude/AI attribution (no Co-Authored-By trailer, no "Generated with" line). Load before making any git commit, writing a commit message, or opening a pull request.
+description: The user's house style for git commits in every project. Commit little and often with Conventional Commit prefixes (feat:, fix:, docs: ...), write well-explained detailed messages in plain simple language, and add NO Claude/AI attribution (no Co-Authored-By trailer, no "Generated with" line). Load before making any git commit, writing a commit message, or opening a pull request.
 ---
 
 # Git commit style
@@ -12,7 +12,7 @@ description: The user's house style for git commits in every project. Commit lit
 
 ## Message format
 ```
-Short summary in plain words, under ~60 characters
+type(scope): short summary in plain words, under ~60 chars
 
 What changed and why, in simple language, as if explaining to a
 colleague who is new to this part of the project. Wrap at ~72 chars.
@@ -21,10 +21,27 @@ colleague who is new to this part of the project. Wrap at ~72 chars.
 - Mention anything surprising: data quirks, trade-offs, things left
   for later (TODOs), and how to try the change (e.g. `make data`).
 ```
-- The summary line is imperative and specific: "Add caretaker flag to cleaned spells", not "updates" or "misc fixes".
+- The summary line is imperative and specific: "feat(pipeline): add caretaker flag to cleaned spells", not "updates" or "misc fixes".
 - The body is always included, except for truly trivial commits such as fixing a typo. Explain the *why*, not just the *what*.
 - Use plain English and avoid jargon. Where a technical term is needed, explain it briefly, e.g. "useMemo (React's cached calculation, like Shiny's reactive())".
-- Don't use emojis, and only use conventional-commit prefixes (feat:, fix:) if the repo already uses them.
+- No emojis.
+
+## Prefixes (Conventional Commits), always use one
+Start the summary line with a lowercase prefix, then a colon:
+- `feat:` a new feature or capability (e.g. a new chart, a new pipeline step)
+- `fix:` a bug fix
+- `data:` a change to committed data, such as a new raw snapshot or regenerated outputs
+- `docs:` documentation only (README, docs/, CLAUDE.md, comments)
+- `test:` adding or changing tests only
+- `refactor:` restructuring code without changing what it does
+- `style:` formatting only (ruff format, prettier)
+- `build:` dependencies and tooling (pyproject, uv.lock, package.json, Makefile)
+- `ci:` GitHub Actions workflows
+- `chore:` housekeeping that fits nowhere else (.gitignore, removing unused files)
+
+An optional scope in brackets says which part of the project changed: `feat(pipeline): …`, `feat(web): …`, `ci(deploy): …`.
+Mark breaking changes with `!`, e.g. `refactor(data)!: rename spells.json fields`, and explain them in the body.
+Example summary line: `feat(pipeline): flag caretaker managers in cleaned spells`.
 
 ## Attribution: none
 - **Never** add `Co-Authored-By: Claude …`, "Generated with Claude Code", or any other AI attribution to commits or PR descriptions.
