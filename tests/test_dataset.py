@@ -74,3 +74,16 @@ def test_main_downloads_when_refresh_is_passed(tmp_path, monkeypatch):
 
     dataset.main(refresh=True, raw_dir=tmp_path)
     assert (tmp_path / "metadata.json").exists()
+
+
+def test_main_refresh_never_overwrites_todays_snapshot(tmp_path, monkeypatch):
+    today = datetime.now(UTC).date()
+    todays_file = dataset.snapshot_path(tmp_path, today)
+    todays_file.write_text("original")
+    calls = []
+    monkeypatch.setattr(dataset, "download_page", lambda url: calls.append(url) or b"new")
+
+    dataset.main(refresh=True, raw_dir=tmp_path)
+
+    assert todays_file.read_text() == "original"  # raw data left untouched
+    assert calls == []  # and Wikipedia wasn't asked for the page again

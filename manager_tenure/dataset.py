@@ -93,8 +93,20 @@ def main(refresh: bool = False, raw_dir: Path = RAW_DATA_DIR) -> None:
         logger.info(f"Using existing snapshot {existing.name} (pass --refresh to re-download)")
         return
 
+    # Snapshots are named by date, so a second download on the same day
+    # would need to replace today's file. Raw data is never overwritten,
+    # so stop with a clear message instead (and skip the download).
+    now = datetime.now(UTC)
+    todays_snapshot = snapshot_path(raw_dir, now.date())
+    if todays_snapshot.exists():
+        logger.warning(
+            f"{todays_snapshot.name} already exists. Raw snapshots are never overwritten; "
+            "delete it by hand if you really want to replace it."
+        )
+        return
+
     content = download_page(WIKI_URL)
-    save_snapshot(content, raw_dir, WIKI_URL, datetime.now(UTC))
+    save_snapshot(content, raw_dir, WIKI_URL, now)
     logger.success("Raw snapshot ready.")
 
 
