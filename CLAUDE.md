@@ -26,6 +26,8 @@
 - **Git:** follow the `git-commits` skill in `.claude/skills/`:
   - Commit little and often, with detailed messages in plain, simple language that explain what and why.
   - **No Claude or AI attribution, ever:** no Co-Authored-By trailer and no "Generated with" line.
+  - **Commit as the repo owner.** Before the first commit in any session (especially cloud sessions), run
+    `git config user.name "Jake Tufts"` and `git config user.email "137207796+JT-39@users.noreply.github.com"`.
 - **Charts:** use the `dataviz-skills` plugin, which is enabled in `.claude/settings.json`.
   - Use `d3` for React + D3 work: D3 does the math, React renders; use a MARGIN object with bounds, `useDimensions` plus `Responsive*` wrappers, and no `d3.select`.
   - Use `inspiration` before designing a chart, `roast-my-chart` before publishing, and `matplotlib` for static figures.
