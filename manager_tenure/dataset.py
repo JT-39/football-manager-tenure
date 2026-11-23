@@ -4,7 +4,8 @@ Run with `uv run python -m manager_tenure.dataset` (or `make data`).
 Add `--refresh` to download a new snapshot even if one already exists.
 
 The raw HTML is saved exactly as downloaded and never edited, next to a
-metadata.json recording where it came from, when, and its sha256 hash.
+its own <snapshot name>.metadata.json recording where it came from, when, and
+its sha256 hash. Older snapshots are kept, and the pipeline uses the newest.
 """
 
 from datetime import UTC, date, datetime
@@ -17,7 +18,7 @@ from loguru import logger
 import requests
 
 from manager_tenure.config import (
-    METADATA_FILENAME,
+    METADATA_SUFFIX,
     RAW_DATA_DIR,
     REQUEST_TIMEOUT_SECONDS,
     SNAPSHOT_PREFIX,
@@ -29,6 +30,14 @@ from manager_tenure.config import (
 def snapshot_path(raw_dir: Path, snapshot_date: date) -> Path:
     """Return the file path for a snapshot taken on a given date."""
     return raw_dir / f"{SNAPSHOT_PREFIX}_{snapshot_date.isoformat()}.html"
+
+
+def metadata_path(html_path: Path) -> Path:
+    """Return the metadata file that sits next to a snapshot.
+
+    wiki_..._2026-11-23.html -> wiki_..._2026-11-23.metadata.json
+    """
+    return html_path.with_suffix(METADATA_SUFFIX)
 
 
 def find_latest_snapshot(raw_dir: Path) -> Path | None:
@@ -69,15 +78,14 @@ def download_page(url: str) -> bytes:
 
 
 def save_snapshot(content: bytes, raw_dir: Path, url: str, retrieved_at: datetime) -> Path:
-    """Write the raw HTML and its metadata.json into raw_dir; return the HTML path."""
+    """Write the raw HTML and its own metadata file into raw_dir; return the HTML path."""
     raw_dir.mkdir(parents=True, exist_ok=True)
     html_path = snapshot_path(raw_dir, retrieved_at.date())
     with html_path.open("xb") as snapshot_file:
         snapshot_file.write(content)
 
     metadata = build_metadata(url, retrieved_at, html_path.name, content)
-    metadata_path = raw_dir / METADATA_FILENAME
-    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
+    metadata_path(html_path).write_text(json.dumps(metadata, indent=2) + "\n")
 
     logger.info(f"Saved snapshot to {html_path} (sha256 {metadata['sha256'][:12]}...)")
     return html_path

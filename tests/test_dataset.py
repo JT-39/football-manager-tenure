@@ -26,7 +26,8 @@ def test_find_latest_snapshot_returns_none_when_empty(tmp_path):
 def test_find_latest_snapshot_picks_newest_date(tmp_path):
     for day in ["2025-12-31", "2026-11-22", "2026-02-01"]:
         (tmp_path / f"wiki_premier_league_managers_{day}.html").write_text("x")
-    (tmp_path / "metadata.json").write_text("{}")  # should be ignored
+    (tmp_path / "wiki_premier_league_managers_2026-11-22.metadata.json").write_text("{}")
+    # ^ metadata files must not be mistaken for snapshots
 
     latest = dataset.find_latest_snapshot(tmp_path)
     assert latest.name == "wiki_premier_league_managers_2026-11-22.html"
@@ -54,7 +55,7 @@ def test_save_snapshot_writes_html_and_metadata(tmp_path):
     html_path = dataset.save_snapshot(content, tmp_path / "raw", URL, WHEN)
 
     assert html_path.read_bytes() == content
-    meta = json.loads((tmp_path / "raw" / "metadata.json").read_text())
+    meta = json.loads(dataset.metadata_path(html_path).read_text())
     assert meta["filename"] == html_path.name
     assert meta["sha256"] == dataset.sha256_of_bytes(content)
 
@@ -73,7 +74,10 @@ def test_main_downloads_when_refresh_is_passed(tmp_path, monkeypatch):
     monkeypatch.setattr(dataset, "download_page", lambda url: b"new")
 
     dataset.main(refresh=True, raw_dir=tmp_path)
-    assert (tmp_path / "metadata.json").exists()
+    new_html = dataset.snapshot_path(tmp_path, datetime.now(UTC).date())
+    assert dataset.metadata_path(new_html).exists()
+    # the older snapshot is kept, not replaced
+    assert (tmp_path / "wiki_premier_league_managers_2026-01-01.html").read_text() == "old"
 
 
 def test_main_refresh_never_overwrites_todays_snapshot(tmp_path, monkeypatch):
@@ -87,3 +91,9 @@ def test_main_refresh_never_overwrites_todays_snapshot(tmp_path, monkeypatch):
 
     assert todays_file.read_text() == "original"  # raw data left untouched
     assert calls == []  # and Wikipedia wasn't asked for the page again
+
+
+def test_metadata_path_sits_next_to_its_snapshot(tmp_path):
+    html = tmp_path / "wiki_premier_league_managers_2026-11-23.html"
+    expected = tmp_path / "wiki_premier_league_managers_2026-11-23.metadata.json"
+    assert dataset.metadata_path(html) == expected

@@ -29,4 +29,6 @@ REQUEST_TIMEOUT_SECONDS = 30
 
 # Raw snapshot files are named <prefix>_<YYYY-MM-DD>.html
 SNAPSHOT_PREFIX = "wiki_premier_league_managers"
-METADATA_FILENAME = "metadata.json"
+# Each snapshot gets its own metadata file next to it, e.g.
+# wiki_premier_league_managers_2026-11-23.metadata.json
+METADATA_SUFFIX = ".metadata.json"
