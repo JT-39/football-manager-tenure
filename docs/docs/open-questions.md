@@ -38,3 +38,7 @@ Add new ones at the top; when one is decided, note the answer and the date.
    placeholders (with a typer CLI). `typer`, `matplotlib`, `numpy` and `python-dotenv`
    are still dependencies. Keep them, or drop what we don't use once the real code
    exists?
+
+   **Partly decided 2026-11-23:** `typer` removed. Each step is now a plain function run with
+   `python -m ...`, because one rarely used flag did not justify a command-line framework.
+   `matplotlib`, `numpy` and `python-dotenv` are still undecided.
