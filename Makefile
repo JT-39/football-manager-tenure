@@ -4,7 +4,7 @@
 
 PROJECT_NAME = football-manager-tenure
 PYTHON_VERSION = 3.12
-PYTHON_INTERPRETER = python
+PYTHON_INTERPRETER = uv run python
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -14,8 +14,7 @@ PYTHON_INTERPRETER = python
 ## Install Python dependencies
 .PHONY: requirements
 requirements:
-	uv sync
-	
+	uv sync --locked
 
 
 
@@ -29,21 +28,21 @@ clean:
 ## Lint using ruff (use `make format` to do formatting)
 .PHONY: lint
 lint:
-	ruff format --check
-	ruff check
+	uv run ruff format --check
+	uv run ruff check
 
 ## Format source code with ruff
 .PHONY: format
 format:
-	ruff check --fix
-	ruff format
+	uv run ruff check --fix
+	uv run ruff format
 
 
 
 ## Run tests
 .PHONY: test
 test:
-	python -m pytest tests
+	uv run pytest
 
 
 ## Set up Python interpreter environment
@@ -53,7 +52,6 @@ create_environment:
 	@echo ">>> New uv virtual environment created. Activate with:"
 	@echo ">>> Windows: .\\\\.venv\\\\Scripts\\\\activate"
 	@echo ">>> Unix/macOS: source ./.venv/bin/activate"
-	
 
 
 
@@ -65,7 +63,7 @@ create_environment:
 ## Make dataset
 .PHONY: data
 data: requirements
-	$(PYTHON_INTERPRETER) manager_tenure/dataset.py
+	$(PYTHON_INTERPRETER) -m manager_tenure.dataset
 
 
 #################################################################################

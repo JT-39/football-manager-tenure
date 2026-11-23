@@ -16,17 +16,19 @@ INTERIM_DATA_DIR = DATA_DIR / "interim"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 EXTERNAL_DATA_DIR = DATA_DIR / "external"
 
-MODELS_DIR = PROJ_ROOT / "models"
-
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
-# If tqdm is installed, configure loguru with tqdm.write
-# https://github.com/Delgan/loguru/issues/135
-try:
-    from tqdm import tqdm
+# Source data: Wikipedia's "List of Premier League managers" (CC BY-SA).
+WIKI_URL = "https://en.wikipedia.org/wiki/List_of_Premier_League_managers"
 
-    logger.remove(0)
-    logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-except ModuleNotFoundError:
-    pass
+# Wikipedia asks automated clients to identify themselves with a descriptive
+# User-Agent: https://meta.wikimedia.org/wiki/User-Agent_policy
+USER_AGENT = "manager-tenure-pipeline/0.1 (open-source educational data project; python-requests)"
+REQUEST_TIMEOUT_SECONDS = 30
+
+# Raw snapshot files are named <prefix>_<YYYY-MM-DD>.html
+SNAPSHOT_PREFIX = "wiki_premier_league_managers"
+# Each snapshot gets its own metadata file next to it, e.g.
+# wiki_premier_league_managers_2026-11-23.metadata.json
+METADATA_SUFFIX = ".metadata.json"

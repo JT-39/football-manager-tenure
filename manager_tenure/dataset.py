@@ -1,29 +1,124 @@
+"""Download and store the raw Wikipedia snapshot (the first step of the pipeline).
+
+Run with `uv run python -m manager_tenure.dataset` (or `make data`).
+Add `--refresh` to download a new snapshot even if one already exists.
+
+The raw HTML is saved exactly as downloaded and never edited, next to a
+its own <snapshot name>.metadata.json recording where it came from, when, and
+its sha256 hash. Older snapshots are kept, and the pipeline uses the newest.
+"""
+
+from datetime import UTC, date, datetime
+import hashlib
+import json
 from pathlib import Path
+import sys
 
 from loguru import logger
-from tqdm import tqdm
-import typer
+import requests
 
-from manager_tenure.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+from manager_tenure.config import (
+    METADATA_SUFFIX,
+    RAW_DATA_DIR,
+    REQUEST_TIMEOUT_SECONDS,
+    SNAPSHOT_PREFIX,
+    USER_AGENT,
+    WIKI_URL,
+)
 
-app = typer.Typer()
+
+def snapshot_path(raw_dir: Path, snapshot_date: date) -> Path:
+    """Return the file path for a snapshot taken on a given date."""
+    return raw_dir / f"{SNAPSHOT_PREFIX}_{snapshot_date.isoformat()}.html"
 
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = RAW_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    # ----------------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Processing dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Processing dataset complete.")
-    # -----------------------------------------
+def metadata_path(html_path: Path) -> Path:
+    """Return the metadata file that sits next to a snapshot.
+
+    wiki_..._2026-11-23.html -> wiki_..._2026-11-23.metadata.json
+    """
+    return html_path.with_suffix(METADATA_SUFFIX)
+
+
+def find_latest_snapshot(raw_dir: Path) -> Path | None:
+    """Return the most recent snapshot in raw_dir, or None if there isn't one.
+
+    The ISO date in the filename sorts correctly as text, so the last
+    name in sorted order is the newest.
+    """
+    snapshots = sorted(raw_dir.glob(f"{SNAPSHOT_PREFIX}_*.html"))
+    return snapshots[-1] if snapshots else None
+
+
+def sha256_of_bytes(content: bytes) -> str:
+    """Return the sha256 hash of some bytes as a hex string."""
+    return hashlib.sha256(content).hexdigest()
+
+
+def build_metadata(url: str, retrieved_at: datetime, filename: str, content: bytes) -> dict:
+    """Describe a snapshot: its source URL, retrieval time (UTC), file and hash."""
+    return {
+        "url": url,
+        "retrieved_at": retrieved_at.isoformat(timespec="seconds"),
+        "filename": filename,
+        "sha256": sha256_of_bytes(content),
+        "bytes": len(content),
+    }
+
+
+def download_page(url: str) -> bytes:
+    """Download a web page politely and return its raw bytes."""
+    logger.info(f"Downloading {url}")
+    response = requests.get(
+        url, headers={"User-Agent": USER_AGENT}, timeout=REQUEST_TIMEOUT_SECONDS
+    )
+    response.raise_for_status()
+    logger.info(f"Downloaded {len(response.content):,} bytes")
+    return response.content
+
+
+def save_snapshot(content: bytes, raw_dir: Path, url: str, retrieved_at: datetime) -> Path:
+    """Write the raw HTML and its own metadata file into raw_dir; return the HTML path."""
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    html_path = snapshot_path(raw_dir, retrieved_at.date())
+    with html_path.open("xb") as snapshot_file:
+        snapshot_file.write(content)
+
+    metadata = build_metadata(url, retrieved_at, html_path.name, content)
+    metadata_path(html_path).write_text(json.dumps(metadata, indent=2) + "\n")
+
+    logger.info(f"Saved snapshot to {html_path} (sha256 {metadata['sha256'][:12]}...)")
+    return html_path
+
+
+def main(refresh: bool = False, raw_dir: Path = RAW_DATA_DIR) -> None:
+    """Make sure a raw snapshot exists, downloading one only if needed.
+
+    refresh=True downloads a new snapshot even if an older one exists.
+    """
+    existing = find_latest_snapshot(raw_dir)
+    if existing and not refresh:
+        logger.info(f"Using existing snapshot {existing.name} (pass --refresh to re-download)")
+        return
+
+    # Snapshots are named by date, so a second download on the same day
+    # would need to replace today's file. Raw data is never overwritten,
+    # so stop with a clear message instead (and skip the download).
+    now = datetime.now(UTC)
+    todays_snapshot = snapshot_path(raw_dir, now.date())
+    if todays_snapshot.exists():
+        logger.warning(
+            f"{todays_snapshot.name} already exists. Raw snapshots are never overwritten; "
+            "delete it by hand if you really want to replace it."
+        )
+        return
+
+    content = download_page(WIKI_URL)
+    save_snapshot(content, raw_dir, WIKI_URL, now)
+    logger.success("Raw snapshot ready.")
 
 
 if __name__ == "__main__":
-    app()
+    # sys.argv is the list of words typed after `python`, so this is True
+    # only when the command ends with --refresh.
+    main(refresh="--refresh" in sys.argv)

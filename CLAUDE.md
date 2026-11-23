@@ -26,6 +26,8 @@
 - **Git:** follow the `git-commits` skill in `.claude/skills/`:
   - Commit little and often, with detailed messages in plain, simple language that explain what and why.
   - **No Claude or AI attribution, ever:** no Co-Authored-By trailer and no "Generated with" line.
+  - **Commit as the repo owner.** Before the first commit in any session (especially cloud sessions), run
+    `git config user.name "Jake Tufts"` and `git config user.email "137207796+JT-39@users.noreply.github.com"`.
 - **Charts:** use the `dataviz-skills` plugin, which is enabled in `.claude/settings.json`.
   - Use `d3` for React + D3 work: D3 does the math, React renders; use a MARGIN object with bounds, `useDimensions` plus `Responsive*` wrappers, and no `d3.select`.
   - Use `inspiration` before designing a chart, `roast-my-chart` before publishing, and `matplotlib` for static figures.
@@ -49,6 +51,12 @@
 
 ## Current status
 Kept up to date by whoever works on the repo. Newest first.
+- 2026-11-23: **Milestone 1a done** (PR from `claude/milestone-1a-python-basics-q4sxhi`, not yet merged).
+  - Scaffold tidied, deps sorted with uv, `uv.lock` and `.python-version` committed.
+  - `dataset.py` downloads and snapshots the Wikipedia page into `data/raw/` (snapshot from 2026-11-23 committed).
+  - Tests and Python CI are in place.
+  - Next is milestone 1b, built together: parse and clean into `spells.parquet`/`spells.json` with a pandera schema.
+  - See `docs/docs/handoff.md` and `docs/docs/open-questions.md`.
 - 2026-11-22: CCDS scaffold committed. Brief and skills added. A cloud session was asked to do the **first half of milestone 1 only**. See `docs/docs/handoff.md` once it exists.
 
 ## Useful commands
