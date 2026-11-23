@@ -49,6 +49,12 @@
 
 ## Current status
 Kept up to date by whoever works on the repo. Newest first.
+- 2026-11-23: **Milestone 1a done** (PR from `claude/milestone-1a-python-basics-q4sxhi`, not yet merged).
+  - Scaffold tidied, deps sorted with uv, `uv.lock` and `.python-version` committed.
+  - `dataset.py` downloads and snapshots the Wikipedia page into `data/raw/` (snapshot from 2026-11-23 committed).
+  - Tests and Python CI are in place.
+  - Next is milestone 1b, built together: parse and clean into `spells.parquet`/`spells.json` with a pandera schema.
+  - See `docs/docs/handoff.md` and `docs/docs/open-questions.md`.
 - 2026-11-22: CCDS scaffold committed. Brief and skills added. A cloud session was asked to do the **first half of milestone 1 only**. See `docs/docs/handoff.md` once it exists.
 
 ## Useful commands
