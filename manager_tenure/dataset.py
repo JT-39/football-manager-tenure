@@ -11,10 +11,10 @@ from datetime import UTC, date, datetime
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 from loguru import logger
 import requests
-import typer
 
 from manager_tenure.config import (
     METADATA_FILENAME,
@@ -24,8 +24,6 @@ from manager_tenure.config import (
     USER_AGENT,
     WIKI_URL,
 )
-
-app = typer.Typer()
 
 
 def snapshot_path(raw_dir: Path, snapshot_date: date) -> Path:
@@ -85,12 +83,11 @@ def save_snapshot(content: bytes, raw_dir: Path, url: str, retrieved_at: datetim
     return html_path
 
 
-@app.command()
-def main(
-    refresh: bool = typer.Option(False, help="Download a new snapshot even if one exists."),
-    raw_dir: Path = RAW_DATA_DIR,
-) -> None:
-    """Make sure a raw snapshot exists, downloading one only if needed."""
+def main(refresh: bool = False, raw_dir: Path = RAW_DATA_DIR) -> None:
+    """Make sure a raw snapshot exists, downloading one only if needed.
+
+    refresh=True downloads a new snapshot even if an older one exists.
+    """
     existing = find_latest_snapshot(raw_dir)
     if existing and not refresh:
         logger.info(f"Using existing snapshot {existing.name} (pass --refresh to re-download)")
@@ -102,4 +99,6 @@ def main(
 
 
 if __name__ == "__main__":
-    app()
+    # sys.argv is the list of words typed after `python`, so this is True
+    # only when the command ends with --refresh.
+    main(refresh="--refresh" in sys.argv)
