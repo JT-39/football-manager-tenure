@@ -74,7 +74,8 @@ def save_snapshot(content: bytes, raw_dir: Path, url: str, retrieved_at: datetim
     """Write the raw HTML and its metadata.json into raw_dir; return the HTML path."""
     raw_dir.mkdir(parents=True, exist_ok=True)
     html_path = snapshot_path(raw_dir, retrieved_at.date())
-    html_path.write_bytes(content)
+    with html_path.open("xb") as snapshot_file:
+        snapshot_file.write(content)
 
     metadata = build_metadata(url, retrieved_at, html_path.name, content)
     metadata_path = raw_dir / METADATA_FILENAME
