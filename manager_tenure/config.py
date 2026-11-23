@@ -18,3 +18,15 @@ EXTERNAL_DATA_DIR = DATA_DIR / "external"
 
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
+
+# Source data: Wikipedia's "List of Premier League managers" (CC BY-SA).
+WIKI_URL = "https://en.wikipedia.org/wiki/List_of_Premier_League_managers"
+
+# Wikipedia asks automated clients to identify themselves with a descriptive
+# User-Agent: https://meta.wikimedia.org/wiki/User-Agent_policy
+USER_AGENT = "manager-tenure-pipeline/0.1 (open-source educational data project; python-requests)"
+REQUEST_TIMEOUT_SECONDS = 30
+
+# Raw snapshot files are named <prefix>_<YYYY-MM-DD>.html
+SNAPSHOT_PREFIX = "wiki_premier_league_managers"
+METADATA_FILENAME = "metadata.json"
