@@ -3,6 +3,20 @@
 Questions that need the project owner's decision. Nobody should choose these alone.
 Add new ones at the top; when one is decided, note the answer and the date.
 
+## Added 2026-11-23 (milestone 1b)
+
+8. **Our tenure vs Wikipedia's "Duration (days)".** About 4% of finished spells disagree,
+   mostly by one day, but some by a lot (Alex McLeish at Birmingham: 1292 vs 1496).
+   Which do we trust, and should a validation check flag the disagreements? To be decided
+   after the exercises are finished. See `milestone-1b-exercises.md`.
+
+**Decided 2026-11-23:**
+- **Question 1:** the spells table is the one with a "Duration (days)" column (521
+  rows).
+- Spells that started before the Premier League keep both their real start date and a
+  Premier League start date (15 Aug 1992), so both tenures are available.
+- Nationality is read from the flag images.
+
 ## Added 2026-11-23 (milestone 1a)
 
 1. **Which table(s) on the Wikipedia page are "the" spells table?**

@@ -51,7 +51,8 @@
 
 ## Current status
 Kept up to date by whoever works on the repo. Newest first.
-- 2026-11-23: **Milestone 1a done** (PR from `claude/milestone-1a-python-basics-q4sxhi`, not yet merged).
+- 2026-11-23: Milestone 1a merged (PR #1). Milestone 1b set up on branch `milestone-1b-clean-spells` as **exercises for the user**. `features.py` has TODO stubs and `tests/test_features.py` has failing tests. **Do not write the TODO function bodies.** Give hints and review the user's code instead (see `docs/docs/milestone-1b-exercises.md`).
+- 2026-11-23: **Milestone 1a done** (PR #1, merged).
   - Scaffold tidied, deps sorted with uv, `uv.lock` and `.python-version` committed.
   - `dataset.py` downloads and snapshots the Wikipedia page into `data/raw/` (snapshot from 2026-11-23 committed).
   - Tests and Python CI are in place.
