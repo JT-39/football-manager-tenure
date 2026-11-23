@@ -35,7 +35,8 @@ Data flows one way: **raw → interim → processed**.
 
 1. **Raw** (`manager_tenure/dataset.py`). Downloads the Wikipedia page once and saves it,
    untouched, as `data/raw/wiki_premier_league_managers_<YYYY-MM-DD>.html` with a
-   `metadata.json` (URL, retrieval time, sha256). The snapshot is committed to git, so
+   matching `wiki_premier_league_managers_<YYYY-MM-DD>.metadata.json` (URL, retrieval
+   time, sha256). Older snapshots are kept; the pipeline uses the newest. The snapshot is committed to git, so
    the pipeline can be rebuilt even if Wikipedia changes. If a snapshot already exists
    the download is skipped. To take a fresh one:
 
@@ -55,7 +56,7 @@ Settings such as the URL and file names live in `manager_tenure/config.py`.
 ├── pyproject.toml         <- dependencies and tool settings (ruff, pytest)
 ├── uv.lock                <- exact locked versions (committed)
 ├── data
-│   ├── raw                <- immutable dated snapshot + metadata.json (committed)
+│   ├── raw                <- immutable dated snapshots + their .metadata.json (committed)
 │   ├── interim            <- intermediate tables (git-ignored, rebuilt by make data)
 │   └── processed          <- final cleaned data (git-ignored, rebuilt by make data)
 ├── docs                   <- mkdocs site, including handoff notes and open questions

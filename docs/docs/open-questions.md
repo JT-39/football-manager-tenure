@@ -16,9 +16,15 @@ Add new ones at the top; when one is decided, note the answer and the date.
    git but its metadata is overwritten (it is still in git history). Alternatives: name
    it `<snapshot>.metadata.json`, or keep a list of snapshots in one file.
 
+   **Decided 2026-11-23:** one `<snapshot>.metadata.json` per snapshot, sitting next to
+   its HTML, so no snapshot ever loses its record of where it came from.
+
 3. **Should a refresh delete older snapshots?**
    Currently they are kept, and the pipeline always uses the newest by date. Keeping them
    grows the repo by about 2.4 MB each time.
+
+   **Decided 2026-11-23:** keep them. Old analyses stay reproducible from the exact data
+   they used, and refreshes are rare, so the size cost is small.
 
 4. **Should `spells.json` be committed?**
    `data/processed/` is git-ignored for now. The website build could either run the

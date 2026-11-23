@@ -19,7 +19,8 @@ work.
    and `data/external/` are ignored.
 4. **Feat(pipeline): `dataset.py`.** Small plain functions to download the page with a
    polite User-Agent, save it as `data/raw/wiki_premier_league_managers_<date>.html`
-   plus `metadata.json` (url, retrieved_at, filename, sha256, bytes), and skip the
+   plus `metadata.json` (url, retrieved_at, filename, sha256, bytes; since renamed to
+   one `<snapshot>.metadata.json` per snapshot, see open questions 2 and 3), and skip the
    download if a snapshot exists unless `--refresh` is passed. Settings are in
    `config.py`.
 5. **Data: raw snapshot from 2026-11-23** (2.4 MB, sha256 `be6bac2d…`).
