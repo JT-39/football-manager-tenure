@@ -64,6 +64,7 @@ create_environment:
 .PHONY: data
 data: requirements
 	$(PYTHON_INTERPRETER) -m manager_tenure.dataset
+	$(PYTHON_INTERPRETER) -m manager_tenure.premier_league
 	$(PYTHON_INTERPRETER) -m manager_tenure.features
 	$(PYTHON_INTERPRETER) -m manager_tenure.export
 

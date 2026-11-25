@@ -38,3 +38,14 @@ METADATA_SUFFIX = ".metadata.json"
 SPELLS_FILE = PROCESSED_DATA_DIR / "spells.parquet"
 # The same table as JSON, for the website. Built from SPELLS_FILE by export.py.
 SPELLS_JSON_FILE = PROCESSED_DATA_DIR / "spells.json"
+
+# Premier League membership, by season (see premier_league.py).
+# football-data.co.uk publishes one CSV per season, listing every match. The
+# files are named by season, e.g. E0_2526.csv for 2025–26.
+FOOTBALL_DATA_BASE_URL = "https://www.football-data.co.uk/mmz4281"
+FOOTBALL_DATA_DIR = RAW_DATA_DIR / "football_data"
+# The first file is the 1993–94 season; there is no file for 1992–93 (see clubs.py).
+FIRST_PL_SEASON = 1993
+LAST_PL_SEASON = 2026  # 2026 is the 2026–27 season, still in progress at the snapshot date
+# Each club's Premier League membership, one row per club per season.
+PREMIER_LEAGUE_SEASONS_FILE = PROCESSED_DATA_DIR / "premier_league_seasons.parquet"
