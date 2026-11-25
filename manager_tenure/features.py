@@ -106,8 +106,14 @@ def add_tenure(spells: pd.DataFrame, league_start: str = PREMIER_LEAGUE_START) -
     - pl_start_date / pl_tenure_days: only the Premier League part. Spells that
       began before league_start count from league_start instead.
     """
-    # TODO (exercise 5)
-    raise NotImplementedError
+    spells = spells.copy()
+    # Subtracting two dates gives a duration; .dt.days turns it into whole days.
+    spells["tenure_days"] = (spells["end_date"] - spells["start_date"]).dt.days
+    # clip() keeps each date no earlier than the league start, so spells that
+    # began before 1992 only count from August 1992.
+    spells["pl_start_date"] = spells["start_date"].clip(lower=pd.Timestamp(league_start))
+    spells["pl_tenure_days"] = (spells["end_date"] - spells["pl_start_date"]).dt.days
+    return spells
 
 
 def read_nationalities(html_path: Path) -> list[str]:
