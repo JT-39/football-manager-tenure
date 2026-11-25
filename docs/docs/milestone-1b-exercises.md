@@ -52,9 +52,10 @@ Turn `from` and `until` into real dates, set ongoing spells to end on `as_of`, a
 6. Finish with `.drop(columns=["from", "until"])`.
 
 ## Exercise 5: `add_tenure`
-Add `tenure_days`, `pl_start_date` and `pl_tenure_days`.
+Add `tenure_days` (total time in charge) and `pl_tenure_days` (days in Premier League seasons).
 1. Subtracting two date columns gives a "timedelta" (a duration) column. `.dt.days` turns it into whole days. (`as.numeric(difftime(..., units = "days"))`.)
-2. To get "the later of start_date and the league start", use `.clip(lower=pd.Timestamp(league_start))`. (`pmax()`.)
+2. The Premier League part is harder. `parse_league_seasons` turns the "Years in League" text into date ranges, and `premier_league_days` counts the days of each spell that overlap those ranges. Read both functions before changing `add_tenure`.
+3. Note the change from the first version: we no longer cut spells off at 1992. Wikipedia's own season list is more accurate, because clubs were in lower divisions before 1992 and after relegation.
 
 ## Exercise 6 (stretch): `read_nationalities`
 Return 521 country names, in table order, read from the flag images.
