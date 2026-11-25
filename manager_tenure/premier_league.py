@@ -149,6 +149,32 @@ def build_memberships(raw_dir: Path = FOOTBALL_DATA_DIR) -> pd.DataFrame:
     return memberships.sort_values(["club", "start_date"]).reset_index(drop=True)
 
 
+def league_periods(memberships: pd.DataFrame) -> pd.DataFrame:
+    """Join each club's seasons into unbroken Premier League periods.
+
+    A summer break counts as Premier League time when the club is in the league
+    both before and after it, so a manager who stays through the summer keeps
+    being charged with those days. A club that is promoted or relegated does not
+    get the summer it spent outside the league, because that summer falls between
+    two separate periods.
+
+    A period runs from the start of the first season in an unbroken run of
+    seasons to the end of the last one. The run's summers are inside it.
+    """
+    periods = []
+    for club, seasons in memberships.sort_values(["club", "season"]).groupby("club"):
+        run_start = None
+        previous = None
+        for row in seasons.itertuples():
+            if previous is None or row.season != previous.season + 1:
+                if previous is not None:
+                    periods.append((club, run_start, previous.end_date))
+                run_start = row.start_date
+            previous = row
+        periods.append((club, run_start, previous.end_date))
+    return pd.DataFrame(periods, columns=["club", "start_date", "end_date"])
+
+
 def main(refresh: bool = False) -> None:
     """Download any missing season files, then save the membership table."""
     download_seasons(refresh=refresh)

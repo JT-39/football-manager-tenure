@@ -27,6 +27,7 @@ import pandas as pd
 
 from manager_tenure.config import PREMIER_LEAGUE_SEASONS_FILE, RAW_DATA_DIR, SPELLS_FILE
 from manager_tenure.dataset import find_latest_snapshot, metadata_path
+from manager_tenure.premier_league import league_periods
 from manager_tenure.schema import SPELLS_SCHEMA
 
 # The symbols Wikipedia puts after a manager's name (see the key at the top of
@@ -147,8 +148,9 @@ def add_tenure(spells: pd.DataFrame, memberships: pd.DataFrame) -> pd.DataFrame:
     spells = spells.copy()
     # Subtracting two dates gives a duration; .dt.days turns it into whole days.
     spells["tenure_days"] = (spells["end_date"] - spells["start_date"]).dt.days
+    periods = league_periods(memberships)
     spells["pl_tenure_days"] = [
-        premier_league_days_for_spell(row.club, row.start_date, row.end_date, memberships)
+        premier_league_days_for_spell(row.club, row.start_date, row.end_date, periods)
         for row in spells.itertuples()
     ]
     return spells
