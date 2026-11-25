@@ -64,6 +64,7 @@ create_environment:
 .PHONY: data
 data: requirements
 	$(PYTHON_INTERPRETER) -m manager_tenure.dataset
+	$(PYTHON_INTERPRETER) -m manager_tenure.features
 
 
 #################################################################################

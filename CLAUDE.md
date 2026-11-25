@@ -51,7 +51,8 @@
 
 ## Current status
 Kept up to date by whoever works on the repo. Newest first.
-- 2026-11-23: **Milestone 1a done** (PR from `claude/milestone-1a-python-basics-q4sxhi`, not yet merged).
+- 2026-11-25: Milestone 1b written on branch `milestone-1b-clean-spells`. The user asked for the six cleaning functions to be written with explanations, instead of as exercises. All 22 tests pass and `make data` produces `data/interim/spells.parquet` (521 spells). Next: the duration investigation (open question 8), then the React side.
+- 2026-11-23: **Milestone 1a done** (PR #1, merged).
   - Scaffold tidied, deps sorted with uv, `uv.lock` and `.python-version` committed.
   - `dataset.py` downloads and snapshots the Wikipedia page into `data/raw/` (snapshot from 2026-11-23 committed).
   - Tests and Python CI are in place.

@@ -23,6 +23,7 @@ dependencies = [
     "pandas",
     "pandera>=0.36.0",
     "pyarrow>=26.0.1",
+    "pyjanitor>=0.32.81",
     "python-dotenv",
     "requests>=2.34.2",
 ]

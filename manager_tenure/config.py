@@ -32,3 +32,6 @@ SNAPSHOT_PREFIX = "wiki_premier_league_managers"
 # Each snapshot gets its own metadata file next to it, e.g.
 # wiki_premier_league_managers_2026-11-23.metadata.json
 METADATA_SUFFIX = ".metadata.json"
+
+# The cleaned table of spells, read by later steps and (eventually) the website.
+SPELLS_FILE = INTERIM_DATA_DIR / "spells.parquet"
