@@ -13,13 +13,17 @@ snapshot and checks a few well-known facts.
 from datetime import date
 
 import pandas as pd
+from pandera.errors import SchemaError, SchemaErrors
 import pytest
 
 from manager_tenure import features
 from manager_tenure.config import RAW_DATA_DIR
-from manager_tenure.dataset import find_latest_snapshot
+from manager_tenure.schema import SPELLS_SCHEMA
 
-SNAPSHOT = find_latest_snapshot(RAW_DATA_DIR)
+# Pinned to the dated snapshot the known-fact checks were written against.
+# Production code always uses the newest snapshot; tests must not, or a routine
+# refresh would break them even when the cleaning code is still correct.
+SNAPSHOT = RAW_DATA_DIR / "wiki_premier_league_managers_2026-11-23.html"
 AS_OF = date(2026, 11, 23)
 
 
@@ -173,3 +177,39 @@ def test_ongoing_spells_end_on_snapshot_day(spells):
 def test_no_negative_tenures(spells):
     assert (spells["tenure_days"] >= 0).all()
     assert (spells["pl_tenure_days"] <= spells["tenure_days"]).all()
+
+
+# ---- Guards added after the PR review ------------------------------------------
+
+
+def test_read_spells_table_refuses_two_matching_tables(tmp_path, monkeypatch):
+    fake_tables = [pd.DataFrame({"Duration (days)": [1]}), pd.DataFrame({"Duration": [2]})]
+    monkeypatch.setattr(features.pd, "read_html", lambda *args, **kwargs: fake_tables)
+    with pytest.raises(ValueError, match="Expected one spells table"):
+        features.read_spells_table(tmp_path / "anything.html")
+
+
+def test_tidy_columns_reports_a_missing_column():
+    raw = pd.DataFrame({"Name": ["x"], "Club": ["y"]})  # the others are missing
+    with pytest.raises(KeyError, match="missing expected columns"):
+        features.tidy_columns(raw)
+
+
+def test_schema_rejects_a_spell_that_ends_before_it_starts():
+    spells = pd.DataFrame(
+        {
+            "name": ["Someone"],
+            "club": ["Somewhere"],
+            "nationality": ["England"],
+            "is_caretaker": [False],
+            "is_ongoing": [False],
+            "start_date": pd.to_datetime(["2000-01-02"]),
+            "end_date": pd.to_datetime(["2000-01-01"]),
+            "tenure_days": [-1],
+            "duration_days": [-1],
+            "pl_start_date": pd.to_datetime(["2000-01-02"]),
+            "pl_tenure_days": [-1],
+        }
+    )
+    with pytest.raises((SchemaError, SchemaErrors)):
+        SPELLS_SCHEMA.validate(spells)
