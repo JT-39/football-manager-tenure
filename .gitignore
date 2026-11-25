@@ -195,3 +195,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+# Raw football-data.co.uk season files are committed like the Wikipedia snapshot,
+# so the pipeline can be rebuilt offline. (Our global ignore list excludes *.csv.)
+!data/raw/football_data/*.csv
+
+# marimo keeps a cache of its session state next to notebooks; it isn't source code.
+notebooks/__marimo__/
