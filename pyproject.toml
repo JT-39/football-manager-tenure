@@ -47,6 +47,7 @@ force-sort-within-sections = true
 dev = [
     "ipython>=9.18.1",
     "jupyterlab>=4.6.6",
+    "marimo>=0.26.0",
     "mkdocs>=1.6.1",
     "notebook>=7.6.5",
     "pytest>=9.2.0",
