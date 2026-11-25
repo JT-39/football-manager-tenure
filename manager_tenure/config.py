@@ -33,5 +33,8 @@ SNAPSHOT_PREFIX = "wiki_premier_league_managers"
 # wiki_premier_league_managers_2026-11-23.metadata.json
 METADATA_SUFFIX = ".metadata.json"
 
-# The cleaned table of spells, read by later steps and (eventually) the website.
-SPELLS_FILE = INTERIM_DATA_DIR / "spells.parquet"
+# The cleaned table of spells. It is final output, so it lives in data/processed/
+# and is rebuilt by `make data` rather than committed to git.
+SPELLS_FILE = PROCESSED_DATA_DIR / "spells.parquet"
+# The same table as JSON, for the website. Built from SPELLS_FILE by export.py.
+SPELLS_JSON_FILE = PROCESSED_DATA_DIR / "spells.json"
