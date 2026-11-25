@@ -20,6 +20,8 @@ from datetime import date
 import json
 from pathlib import Path
 
+# Importing janitor adds the .clean_names() method to DataFrames (used in tidy_columns).
+import janitor  # noqa: F401
 from loguru import logger
 import pandas as pd
 
@@ -38,8 +40,10 @@ def read_spells_table(html_path: Path) -> pd.DataFrame:
     The page has about ten tables; the spells table is the only one with a
     "Duration (days)" column.
     """
-    # TODO (exercise 1)
-    raise NotImplementedError
+
+    spells = pd.read_html(html_path, match="Duration")[0]
+
+    return spells
 
 
 def tidy_columns(spells: pd.DataFrame) -> pd.DataFrame:
@@ -49,8 +53,11 @@ def tidy_columns(spells: pd.DataFrame) -> pd.DataFrame:
     Drops: "Nat." (empty, pandas can't read flag images), "Years in League"
     (we compute our own), "Ref." (citation numbers).
     """
-    # TODO (exercise 2)
-    raise NotImplementedError
+
+    spells = spells.drop(columns=["Nat.", "Years in League", "Ref."])
+    spells = spells.clean_names(strip_underscores=True)
+
+    return spells
 
 
 def flag_caretakers(spells: pd.DataFrame) -> pd.DataFrame:
