@@ -27,11 +27,24 @@ import pandas as pd
 
 from manager_tenure.config import PREMIER_LEAGUE_START, RAW_DATA_DIR, SPELLS_FILE
 from manager_tenure.dataset import find_latest_snapshot, metadata_path
+from manager_tenure.schema import SPELLS_SCHEMA
 
 # The symbols Wikipedia puts after a manager's name (see the key at the top of
 # the page): † current manager, ‡ caretaker, § current but club relegated.
 CARETAKER_MARKER = "‡"
 NAME_MARKERS = "†‡§"
+
+# Columns that tidy_columns needs to find in the Wikipedia table.
+TABLE_COLUMNS_TO_TIDY = [
+    "Name",
+    "Club",
+    "From",
+    "Until",
+    "Duration (days)",
+    "Nat.",
+    "Years in League",
+    "Ref.",
+]
 
 
 def read_spells_table(html_path: Path) -> pd.DataFrame:
@@ -41,18 +54,28 @@ def read_spells_table(html_path: Path) -> pd.DataFrame:
     "Duration (days)" column.
     """
 
-    spells = pd.read_html(html_path, match="Duration")[0]
-
-    return spells
+    tables = pd.read_html(html_path, match="Duration")
+    # Fail loudly if Wikipedia adds a second table with "Duration" in it, rather
+    # than silently reading the first one.
+    if len(tables) != 1:
+        raise ValueError(f"Expected one spells table, found {len(tables)} with 'Duration'.")
+    return tables[0]
 
 
 def tidy_columns(spells: pd.DataFrame) -> pd.DataFrame:
     """Rename columns to snake_case and drop the ones we don't use.
 
-    Keeps: name, nationality (if present), club, from, until, duration_days.
+    Keeps: name, club, from, until, duration_days, and nationality (added by
+    main() from the flag images before this step runs).
     Drops: "Nat." (empty, pandas can't read flag images), "Years in League"
     (we compute our own), "Ref." (citation numbers).
+
+    clean_names() comes from the pyjanitor package. It only exists because
+    "import janitor" runs at the top of this file.
     """
+    missing = [col for col in TABLE_COLUMNS_TO_TIDY if col not in spells.columns]
+    if missing:
+        raise KeyError(f"Wikipedia table is missing expected columns: {missing}")
 
     spells = spells.drop(columns=["Nat.", "Years in League", "Ref."])
     spells = spells.clean_names(strip_underscores=True)
@@ -132,7 +155,8 @@ def read_nationalities(html_path: Path) -> list[str]:
     for row in table.findall(".//tr")[1:]:
         # The first <td> in each row holds the flag. Its <img alt="..."> gives
         # the country name; a row with no flag gets None.
-        flags = row.findall("td")[0].findall(".//img")
+        cells = row.findall("td")
+        flags = cells[0].findall(".//img") if cells else []
         nationalities.append(flags[0].get("alt") if flags else None)
     return nationalities
 
@@ -151,7 +175,14 @@ def main(raw_dir: Path = RAW_DATA_DIR, output_path: Path = SPELLS_FILE) -> None:
     logger.info(f"Cleaning {html_path.name}")
 
     spells = read_spells_table(html_path)
-    spells["nationality"] = read_nationalities(html_path)
+    nationalities = read_nationalities(html_path)
+    # The names come from pandas and the flags from lxml, so check they line up.
+    # If they don't, a nationality would silently attach to the wrong manager.
+    if len(nationalities) != len(spells):
+        raise ValueError(
+            f"Found {len(spells)} spell rows but {len(nationalities)} flag rows. They must match."
+        )
+    spells["nationality"] = nationalities
     spells = (
         spells.pipe(tidy_columns)
         .pipe(flag_caretakers)
@@ -159,6 +190,7 @@ def main(raw_dir: Path = RAW_DATA_DIR, output_path: Path = SPELLS_FILE) -> None:
         .pipe(add_tenure)
     )
 
+    SPELLS_SCHEMA.validate(spells)  # raises a clear error if any rule is broken
     output_path.parent.mkdir(parents=True, exist_ok=True)
     spells.to_parquet(output_path, index=False)
     logger.success(f"Saved {len(spells)} spells to {output_path}")
