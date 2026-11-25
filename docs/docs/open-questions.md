@@ -23,7 +23,23 @@ Add new ones at the top; when one is decided, note the answer and the date.
   Season labels are read as start years, with ranges ending before their last year
   ("2015–2020" is 2015/16 to 2019/20), which fits most spells.
 
-  **Known data issue:** the labels aren't fully consistent. West Ham's spell for Graham
+  **Found 2026-11-25 while building the notebook (not yet decided):** 71 spells show zero
+  Premier League days, and several are wrong. Stewart Houston (Arsenal, 1995) and David Webb
+  (Chelsea, 1993) are in the Premier League seasons, but the labels were read as the season
+  that starts in that year. Checking the labels against known spells shows:
+  - Ranges (`2012–2013`) match the season that *starts* in the first year. This works well.
+  - Single years (`1993`) often mean the season that *ends* in that year.
+  - Spells that cross two seasons only get the season Wikipedia lists, so they are undercounted
+    (Mark Hughes, Southampton 2018).
+
+  Options, to decide together:
+  - **(a)** Read single years as the season that ends in that year. This fixes about 12 known
+    cases but is still a guess for some rows.
+  - **(b)** Use a separate table of which clubs were in the Premier League in each season. This
+    is the most accurate, but it's a new data source and a bigger piece of work.
+  - **(c)** Publish total tenure only for now, and leave out Premier League tenure until (b).
+
+**Known data issue:** the labels aren't fully consistent. West Ham's spell for Graham
   Potter is labelled "2025" alone, but he was there from January to September 2025, so
   only 57 Premier League days are counted. Chelsea's "2022–2023" follows the same reading,
   so this looks like a labelling error on the Wikipedia page. Decide later whether to fix
