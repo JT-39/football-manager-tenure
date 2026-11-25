@@ -81,8 +81,22 @@ def parse_dates(spells: pd.DataFrame, as_of: date) -> pd.DataFrame:
     taken) so their tenure so far can be measured. The original text columns
     "from" and "until" are dropped.
     """
-    # TODO (exercise 4)
-    raise NotImplementedError
+    spells = spells.copy()
+    # Ongoing spells say "Present*" on Wikipedia, rather than a date.
+    spells["is_ongoing"] = spells["until"].str.startswith("Present")
+
+    # Remove footnote markers such as "[a]" (a regular expression: \[ is a
+    # literal "[", and .*? matches the letters up to the next "]").
+    from_text = spells["from"].str.replace(r"\[.*?\]", "", regex=True)
+    until_text = spells["until"].str.replace(r"\[.*?\]", "", regex=True)
+
+    spells["start_date"] = pd.to_datetime(from_text, format="%d %B %Y")
+    # Blank out the ongoing rows first, so they become missing dates (NaT).
+    end_dates = pd.to_datetime(until_text.where(~spells["is_ongoing"]), format="%d %B %Y")
+    # Ongoing spells run up to the day the snapshot was taken.
+    spells["end_date"] = end_dates.fillna(pd.Timestamp(as_of))
+
+    return spells.drop(columns=["from", "until"])
 
 
 def add_tenure(spells: pd.DataFrame, league_start: str = PREMIER_LEAGUE_START) -> pd.DataFrame:
