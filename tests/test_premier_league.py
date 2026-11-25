@@ -99,3 +99,43 @@ def test_southampton_membership_matches_their_history():
     assert 1992 in seasons and 2004 in seasons  # top flight 1992 to 2005
     assert 2008 not in seasons  # relegated, so not in the Premier League
     assert 2024 in seasons  # back in the Premier League for 2024–25
+
+
+# ---- Summer breaks ------------------------------------------------------------
+
+
+def _club_seasons(club: str, seasons: list[int]) -> pd.DataFrame:
+    """A small membership table: one row per season, with the season's first and last match."""
+    return pd.DataFrame(
+        {
+            "club": club,
+            "season": seasons,
+            "start_date": [pd.Timestamp(f"{y}-08-15") for y in seasons],
+            "end_date": [pd.Timestamp(f"{y + 1}-05-15") for y in seasons],
+        }
+    )
+
+
+def test_summer_between_two_top_flight_seasons_counts():
+    periods = premier_league.league_periods(_club_seasons("Arsenal", [2000, 2001]))
+    assert len(periods) == 1
+    # One unbroken period, so the summer of 2001 is inside it.
+    assert periods.iloc[0]["start_date"] == pd.Timestamp("2000-08-15")
+    assert periods.iloc[0]["end_date"] == pd.Timestamp("2002-05-15")
+
+
+def test_promotion_and_relegation_summers_do_not_count():
+    # In the league 2000 and 2001, out in 2002, back in 2003: two separate periods.
+    periods = premier_league.league_periods(_club_seasons("Arsenal", [2000, 2001, 2003]))
+    assert len(periods) == 2
+    assert periods.iloc[0]["end_date"] == pd.Timestamp("2002-05-15")
+    assert periods.iloc[1]["start_date"] == pd.Timestamp("2003-08-15")
+
+
+def test_each_club_gets_its_own_periods():
+    both = pd.concat(
+        [_club_seasons("Arsenal", [2000, 2001]), _club_seasons("Chelsea", [2005])],
+        ignore_index=True,
+    )
+    periods = premier_league.league_periods(both)
+    assert sorted(periods["club"]) == ["Arsenal", "Chelsea"]

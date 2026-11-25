@@ -133,6 +133,7 @@ def test_exercise5_splits_total_and_premier_league_tenure():
     memberships = pd.DataFrame(
         {
             "club": ["Arsenal", "Arsenal"],
+            "season": [1992, 1996],
             "start_date": pd.to_datetime(["1992-08-15", "1996-08-17"]),
             "end_date": pd.to_datetime(["1993-05-11", "2018-05-20"]),
         }
