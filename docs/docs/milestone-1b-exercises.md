@@ -54,8 +54,8 @@ Turn `from` and `until` into real dates, set ongoing spells to end on `as_of`, a
 ## Exercise 5: `add_tenure`
 Add `tenure_days` (total time in charge) and `pl_tenure_days` (days in Premier League seasons).
 1. Subtracting two date columns gives a "timedelta" (a duration) column. `.dt.days` turns it into whole days. (`as.numeric(difftime(..., units = "days"))`.)
-2. The Premier League part is harder. `parse_league_seasons` turns the "Years in League" text into date ranges, and `premier_league_days` counts the days of each spell that overlap those ranges. Read both functions before changing `add_tenure`.
-3. Note the change from the first version: we no longer cut spells off at 1992. Wikipedia's own season list is more accurate, because clubs were in lower divisions before 1992 and after relegation.
+2. For Premier League time, each club's seasons come from `premier_league.py`: one row per club per season, with the first and last match dates. `premier_league_days` counts the days of a spell that overlap those dates.
+3. The first version used Wikipedia's "Years in League" labels. They turned out to be inconsistent, so they were replaced with the match data. See `open-questions.md`.
 
 ## Exercise 6 (stretch): `read_nationalities`
 Return 521 country names, in table order, read from the flag images.

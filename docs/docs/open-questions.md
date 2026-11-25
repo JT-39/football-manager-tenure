@@ -32,7 +32,12 @@ Add new ones at the top; when one is decided, note the answer and the date.
   - Spells that cross two seasons only get the season Wikipedia lists, so they are undercounted
     (Mark Hughes, Southampton 2018).
 
-  Options, to decide together:
+  **Decided 2026-11-25: option (b).** Premier League time now comes from the match data
+  (football-data.co.uk). See `premier_league.py`. The Years-in-League labels are no longer used.
+  Summer breaks don't count, since a club's Premier League days run from its first to its last
+  match of each season.
+
+  Options that were considered:
   - **(a)** Read single years as the season that ends in that year. This fixes about 12 known
     cases but is still a guess for some rows.
   - **(b)** Use a separate table of which clubs were in the Premier League in each season. This
