@@ -23,6 +23,7 @@ from pathlib import Path
 # Importing janitor adds the .clean_names() method to DataFrames (used in tidy_columns).
 import janitor  # noqa: F401
 from loguru import logger
+from lxml import html
 import pandas as pd
 
 from manager_tenure.config import PREMIER_LEAGUE_START, RAW_DATA_DIR, SPELLS_FILE
@@ -122,8 +123,19 @@ def read_nationalities(html_path: Path) -> list[str]:
     pandas can't read images, but each flag is an <img> whose alt text is the
     country name, e.g. alt="Scotland".
     """
-    # TODO (exercise 6, stretch: uses lxml rather than pandas)
-    raise NotImplementedError
+    # pandas cannot see images, so read the HTML directly with lxml.
+    doc = html.parse(str(html_path))
+    # The spells table is the one whose text contains "Duration".
+    table = next(t for t in doc.iter("table") if "Duration" in t.text_content())
+
+    nationalities = []
+    # The first row is the header, so skip it.
+    for row in table.findall(".//tr")[1:]:
+        # The first <td> in each row holds the flag. Its <img alt="..."> gives
+        # the country name; a row with no flag gets None.
+        flags = row.findall("td")[0].findall(".//img")
+        nationalities.append(flags[0].get("alt") if flags else None)
+    return nationalities
 
 
 def snapshot_date(html_path: Path) -> date:
