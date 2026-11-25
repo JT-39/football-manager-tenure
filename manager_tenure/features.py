@@ -11,9 +11,8 @@ The steps run in order, each taking a DataFrame and returning a new one:
     parse_dates            real dates, plus is_ongoing for current spells
     add_tenure             tenure in days: full spell and Premier League only
 
-Milestone 1b exercises: the functions marked TODO are yours to write. Each one
-has tests in tests/test_features.py. Run `make test` until they all pass. Hints
-are in docs/docs/milestone-1b-exercises.md.
+Each function has tests in tests/test_features.py. Hints for each step are in
+docs/docs/milestone-1b-exercises.md.
 """
 
 from datetime import date

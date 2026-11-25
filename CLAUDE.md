@@ -51,7 +51,7 @@
 
 ## Current status
 Kept up to date by whoever works on the repo. Newest first.
-- 2026-11-23: Milestone 1a merged (PR #1). Milestone 1b set up on branch `milestone-1b-clean-spells` as **exercises for the user**. `features.py` has TODO stubs and `tests/test_features.py` has failing tests. **Do not write the TODO function bodies.** Give hints and review the user's code instead (see `docs/docs/milestone-1b-exercises.md`).
+- 2026-11-25: Milestone 1b written on branch `milestone-1b-clean-spells`. The user asked for the six cleaning functions to be written with explanations, instead of as exercises. All 22 tests pass and `make data` produces `data/interim/spells.parquet` (521 spells). Next: the duration investigation (open question 8), then the React side.
 - 2026-11-23: **Milestone 1a done** (PR #1, merged).
   - Scaffold tidied, deps sorted with uv, `uv.lock` and `.python-version` committed.
   - `dataset.py` downloads and snapshots the Wikipedia page into `data/raw/` (snapshot from 2026-11-23 committed).
