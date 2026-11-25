@@ -21,8 +21,9 @@ SPELLS_SCHEMA = pa.DataFrameSchema(
         "start_date": pa.Column(pa.DateTime, nullable=False),
         "end_date": pa.Column(pa.DateTime, nullable=False),
         "tenure_days": pa.Column(int, pa.Check.ge(0)),
-        "pl_start_date": pa.Column(pa.DateTime, nullable=False),
         "pl_tenure_days": pa.Column(int, pa.Check.ge(0)),
+        # The day the Wikipedia page was downloaded, so every row says where it came from.
+        "snapshot_date": pa.Column(pa.DateTime, nullable=False),
         # Wikipedia's own duration, kept only to compare with tenure_days (open question 8).
         "duration_days": pa.Column(int, pa.Check.ge(0)),
     },

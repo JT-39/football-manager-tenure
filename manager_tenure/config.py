@@ -33,10 +33,5 @@ SNAPSHOT_PREFIX = "wiki_premier_league_managers"
 # wiki_premier_league_managers_2026-11-23.metadata.json
 METADATA_SUFFIX = ".metadata.json"
 
-# Cleaning settings (used by features.py)
-# The first Premier League matches were played on 15 August 1992. Spells that
-# started earlier (e.g. Ferguson, appointed 1986) only count as Premier League
-# time from this date.
-PREMIER_LEAGUE_START = "1992-08-15"
 # The cleaned table of spells, read by later steps and (eventually) the website.
 SPELLS_FILE = INTERIM_DATA_DIR / "spells.parquet"
