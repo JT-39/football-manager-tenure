@@ -66,8 +66,11 @@ def flag_caretakers(spells: pd.DataFrame) -> pd.DataFrame:
     "Stewart Houston ‡" becomes "Stewart Houston" with is_caretaker=True.
     "Mikel Arteta †" becomes "Mikel Arteta" with is_caretaker=False.
     """
-    # TODO (exercise 3)
-    raise NotImplementedError
+    spells = spells.copy()  # work on a copy so the caller's table is not changed
+    spells["is_caretaker"] = spells["name"].str.contains(CARETAKER_MARKER, regex=False)
+    # strip() removes characters from the start and end of each name only.
+    spells["name"] = spells["name"].str.strip(NAME_MARKERS + " ")
+    return spells
 
 
 def parse_dates(spells: pd.DataFrame, as_of: date) -> pd.DataFrame:
