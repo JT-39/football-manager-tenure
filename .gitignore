@@ -201,3 +201,8 @@ cython_debug/
 
 # marimo keeps a cache of its session state next to notebooks; it isn't source code.
 notebooks/__marimo__/
+
+# The website's source folders share names with Python's ignore rules
+# ("lib/") and with a global *.html rule, so they are allowed explicitly.
+!web/src/lib/
+!web/index.html
