@@ -86,8 +86,8 @@ def download_seasons(raw_dir: Path = FOOTBALL_DATA_DIR, refresh: bool = False) -
         logger.info(f"Downloaded {path.name}")
 
 
-def read_matches(path: Path) -> pd.DataFrame:
-    """Read the date and the two teams from every match in a season file.
+def read_columns(path: Path, names: list[str]) -> pd.DataFrame:
+    """Read the named columns from every match row in a season file.
 
     The older files have rows with a different number of columns from the header,
     and a plain CSV reader drops those rows, losing real matches. So this reads each
@@ -96,17 +96,22 @@ def read_matches(path: Path) -> pd.DataFrame:
     with path.open(encoding="latin1") as file:
         rows = list(csv.reader(file))
     header = rows[0]
-    date_col, home_col, away_col = (
-        header.index(name) for name in ("Date", "HomeTeam", "AwayTeam")
-    )
-    needed = max(date_col, home_col, away_col)
+    positions = [header.index(name) for name in names]
+    needed = max(positions)
+    team_col = header.index("HomeTeam")
 
-    matches = [
-        (row[date_col], row[home_col].strip(), row[away_col].strip())
+    kept = [
+        [row[pos].strip() for pos in positions]
         for row in rows[1:]
-        if len(row) > needed and row[home_col].strip()
+        if len(row) > needed and row[team_col].strip()
     ]
-    table = pd.DataFrame(matches, columns=["date", "home", "away"])
+    return pd.DataFrame(kept, columns=names)
+
+
+def read_matches(path: Path) -> pd.DataFrame:
+    """Read the date and the two teams from every match in a season file."""
+    table = read_columns(path, ["Date", "HomeTeam", "AwayTeam"])
+    table = table.rename(columns={"Date": "date", "HomeTeam": "home", "AwayTeam": "away"})
     table["date"] = pd.to_datetime(table["date"], dayfirst=True, format="mixed")
     return table
 

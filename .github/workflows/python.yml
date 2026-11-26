@@ -27,9 +27,11 @@ jobs:
       - name: Check formatting
         run: uv run ruff format --check .
 
+      # Builds every output from the committed raw files. Nothing is downloaded,
+      # because each download step skips files that already exist.
+      - name: Run pipeline
+        run: make data
+
+      # Runs after the pipeline, so the tests can check the real outputs.
       - name: Test
         run: uv run pytest
-
-      # Uses the committed raw snapshot, so this does not download anything.
-      - name: Run pipeline
-        run: uv run python -m manager_tenure.dataset
