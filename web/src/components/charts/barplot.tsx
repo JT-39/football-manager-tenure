@@ -29,6 +29,15 @@ export function ResponsiveBarplot(props: Omit<BarplotProps, 'width' | 'height'>)
 }
 
 /**
+ * A text version of the chart for screen readers, e.g. "Bar chart: Alpha 42, Beta 28".
+ * Sighted users see the bars; this gives everyone the same numbers.
+ */
+function describe(data: BarDatum[]): string {
+  const values = data.map((d) => `${d.name} ${d.value}`).join(', ')
+  return `Bar chart: ${values}`
+}
+
+/**
  * The chart itself. D3 works out the positions (the maths); React draws the
  * elements with JSX (the rendering). It never touches the page directly.
  */
@@ -57,7 +66,7 @@ function Barplot({ width, height, data }: BarplotProps) {
   const yTicks = yScale.ticks(Math.max(2, Math.floor(boundsHeight / 60)))
 
   return (
-    <svg width={width} height={height} role="img" aria-label="Bar chart">
+    <svg width={width} height={height} role="img" aria-label={describe(data)}>
       <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
         {/* Horizontal grid lines and their labels */}
         {yTicks.map((tick) => (

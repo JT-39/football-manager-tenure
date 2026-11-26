@@ -20,6 +20,21 @@ export default function App() {
       <div style={{ height: 400 }}>
         <ResponsiveBarplot data={exampleBarData} />
       </div>
+
+      {/* Credit for the Wikipedia data (CC BY-SA 4.0 requires attribution and a licence link). */}
+      <footer className="mt-24 border-t pt-6 text-sm text-muted-foreground">
+        <p>
+          Manager data from{' '}
+          <a className="underline" href="https://en.wikipedia.org/wiki/List_of_Premier_League_managers">
+            Wikipedia: List of Premier League managers
+          </a>{' '}
+          by Wikipedia contributors, licensed under{' '}
+          <a className="underline" href="https://creativecommons.org/licenses/by-sa/4.0/">
+            CC BY-SA 4.0
+          </a>
+          . The bars above are example data, not the managers' data.
+        </p>
+      </footer>
     </main>
   )
 }

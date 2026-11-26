@@ -121,6 +121,12 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* The bar colour used by charts. Change this one line to recolour every chart.
+   Dark enough to be seen on white (at least 3:1 contrast). */
+:root {
+  --chart-1: oklch(0.5 0.16 255);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
