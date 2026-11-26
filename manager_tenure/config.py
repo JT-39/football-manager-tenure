@@ -49,3 +49,7 @@ FIRST_PL_SEASON = 1993
 LAST_PL_SEASON = 2026  # 2026 is the 2026–27 season, still in progress at the snapshot date
 # Each club's Premier League membership, one row per club per season.
 PREMIER_LEAGUE_SEASONS_FILE = PROCESSED_DATA_DIR / "premier_league_seasons.parquet"
+
+# Results for each manager's spell (see results.py).
+SPELL_MATCHES_FILE = PROCESSED_DATA_DIR / "spell_matches.parquet"
+SPELL_RESULTS_FILE = PROCESSED_DATA_DIR / "spell_results.parquet"
