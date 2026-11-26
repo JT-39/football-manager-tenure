@@ -51,14 +51,24 @@ def season_file(raw_dir: Path, start_year: int) -> Path:
 
 
 def download_seasons(raw_dir: Path = FOOTBALL_DATA_DIR, refresh: bool = False) -> None:
-    """Download each season's CSV file that isn't already saved, then update the manifest."""
+    """Download each season file that isn't saved yet.
+
+    A completed season is never downloaded again, even with refresh=True, so the
+    files behind the results stay the same. Only the season still being played
+    (LAST_PL_SEASON) is refreshed, since its file grows during the season. Old
+    versions of the files stay in git history.
+
+    The manifest is saved after every download, so a failed run never leaves a
+    file without its record.
+    """
     raw_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = raw_dir / MANIFEST_NAME
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
 
     for start_year in range(FIRST_PL_SEASON, LAST_PL_SEASON + 1):
         path = season_file(raw_dir, start_year)
-        if path.exists() and not refresh:
+        still_playing = start_year == LAST_PL_SEASON
+        if path.exists() and not (refresh and still_playing):
             continue
         url = f"{FOOTBALL_DATA_BASE_URL}/{season_code(start_year)}/E0.csv"
         response = requests.get(
@@ -72,9 +82,8 @@ def download_seasons(raw_dir: Path = FOOTBALL_DATA_DIR, refresh: bool = False) -
             "sha256": hashlib.sha256(response.content).hexdigest(),
             "bytes": len(response.content),
         }
+        manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
         logger.info(f"Downloaded {path.name}")
-
-    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 
 
 def read_matches(path: Path) -> pd.DataFrame:

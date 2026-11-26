@@ -122,6 +122,19 @@ def test_premier_league_days_only_counts_days_inside_seasons():
     assert days == (pd.Timestamp("2020-05-18") - pd.Timestamp("2015-08-08")).days
 
 
+def _arsenal_seasons(skip: tuple = ()) -> pd.DataFrame:
+    """Arsenal's Premier League seasons from 1996 to 2017, one row per season."""
+    years = [y for y in range(1996, 2018) if y not in skip]
+    return pd.DataFrame(
+        {
+            "club": "Arsenal",
+            "season": years,
+            "start_date": [pd.Timestamp(f"{y}-08-15") for y in years],
+            "end_date": [pd.Timestamp(f"{y + 1}-05-15") for y in years],
+        }
+    )
+
+
 def test_exercise5_splits_total_and_premier_league_tenure():
     spells = pd.DataFrame(
         {
@@ -130,22 +143,47 @@ def test_exercise5_splits_total_and_premier_league_tenure():
             "end_date": pd.to_datetime(["1995-02-21", "2018-05-13"]),
         }
     )
-    memberships = pd.DataFrame(
-        {
-            "club": ["Arsenal", "Arsenal"],
-            "season": [1992, 1996],
-            "start_date": pd.to_datetime(["1992-08-15", "1996-08-17"]),
-            "end_date": pd.to_datetime(["1993-05-11", "2018-05-20"]),
-        }
+    memberships = pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "club": ["Arsenal"],
+                    "season": [1992],
+                    "start_date": pd.to_datetime(["1992-08-15"]),
+                    "end_date": pd.to_datetime(["1993-05-11"]),
+                }
+            ),
+            _arsenal_seasons(),
+        ],
+        ignore_index=True,
     )
     result = features.add_tenure(spells, memberships=memberships)
     # Total time in charge, including before the Premier League existed.
     assert result["tenure_days"].tolist() == [3205, 7894]
-    # Only the days inside the Premier League seasons count.
-    assert result["pl_tenure_days"].tolist() == [
-        (pd.Timestamp("1993-05-11") - pd.Timestamp("1992-08-15")).days,
-        (pd.Timestamp("2018-05-13") - pd.Timestamp("1996-10-01")).days,
-    ]
+    # Arsenal stayed in the league from 1996 without a break, so the summers count
+    # and the whole 1996 to 2018 spell is Premier League time.
+    assert result.loc[1, "pl_tenure_days"] == 7894
+    # George Graham's 1986 to 1995 spell: only the 1992–93 season counts, from
+    # 15 August 1992 to the end of the season.
+    assert (
+        result.loc[0, "pl_tenure_days"]
+        == (pd.Timestamp("1993-05-11") - pd.Timestamp("1992-08-15")).days
+    )
+
+
+def test_a_season_out_of_the_league_is_not_counted():
+    # Arsenal are missing from the league in 2005 (as if relegated and promoted
+    # again), so the summers either side of that gap do not count.
+    spells = pd.DataFrame(
+        {
+            "club": ["Arsenal"],
+            "start_date": pd.to_datetime(["1996-10-01"]),
+            "end_date": pd.to_datetime(["2018-05-13"]),
+        }
+    )
+    unbroken = features.add_tenure(spells, memberships=_arsenal_seasons())
+    with_gap = features.add_tenure(spells, memberships=_arsenal_seasons(skip=(2005,)))
+    assert with_gap.loc[0, "pl_tenure_days"] < unbroken.loc[0, "pl_tenure_days"]
 
 
 # ---- Exercise 6 (stretch): read_nationalities --------------------------------
@@ -193,6 +231,13 @@ def test_ongoing_spells_end_on_snapshot_day(spells):
     ongoing = spells[spells["is_ongoing"]]
     assert len(ongoing) == 20  # one per current Premier League club
     assert (ongoing["end_date"] == pd.Timestamp(AS_OF)).all()
+
+
+def test_middlesbrough_in_the_first_season_counts(spells):
+    # Lennie Lawrence managed Middlesbrough from 1991, and they were in the league in 1992–93.
+    lawrence = spells[spells["name"] == "Lennie Lawrence"].iloc[0]
+    assert lawrence["club"] == "Middlesbrough"
+    assert lawrence["pl_tenure_days"] > 0
 
 
 def test_no_negative_tenures(spells):

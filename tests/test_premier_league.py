@@ -59,6 +59,12 @@ def test_unknown_club_name_stops_with_a_clear_error(tmp_path):
         premier_league.season_memberships(path, 1993)
 
 
+def test_founding_clubs_match_the_1992_93_table():
+    # Middlesbrough were in the league in 1992–93; Swindon Town joined in 1993–94.
+    assert "Middlesbrough" in FOUNDING_CLUBS_1992
+    assert "Swindon Town" not in FOUNDING_CLUBS_1992
+
+
 def test_founding_clubs_are_22_known_names():
     assert len(FOUNDING_CLUBS_1992) == 22
     assert set(FOUNDING_CLUBS_1992) <= set(FOOTBALL_DATA_TO_WIKIPEDIA.values())
