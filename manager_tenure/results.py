@@ -26,6 +26,7 @@ from manager_tenure.config import (
     SPELLS_FILE,
 )
 from manager_tenure.premier_league import read_columns, season_file
+from manager_tenure.schema import SPELL_MATCHES_SCHEMA, SPELL_RESULTS_SCHEMA
 
 RESULT_COLUMNS = ["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"]
 
@@ -146,7 +147,12 @@ def main(
     spell_matches = attach_spells(club_matches, spells)
     summary = summarise_spells(spell_matches, spells)
 
-    matches_output.parent.mkdir(parents=True, exist_ok=True)
+    # Check both tables before saving either one, so a bad run writes nothing.
+    SPELL_MATCHES_SCHEMA.validate(spell_matches)
+    SPELL_RESULTS_SCHEMA.validate(summary)
+
+    for output in (matches_output, results_output):
+        output.parent.mkdir(parents=True, exist_ok=True)
     spell_matches.to_parquet(matches_output, index=False)
     summary.to_parquet(results_output, index=False)
     logger.success(f"Saved {len(spell_matches)} club-matches and {len(summary)} spell results")
