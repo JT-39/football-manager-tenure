@@ -35,7 +35,7 @@ from manager_tenure.config import (
 )
 
 MANIFEST_NAME = "manifest.json"
-# The 1992–93 season, as approximate dates: the first matches and the last day.
+# The 1992–93 season: first matchday and last matchday, from the Wikipedia season article.
 FOUNDING_START = pd.Timestamp("1992-08-15")
 FOUNDING_END = pd.Timestamp("1993-05-11")
 
@@ -138,7 +138,7 @@ def season_memberships(path: Path, start_year: int) -> pd.DataFrame:
 
 
 def founding_memberships() -> pd.DataFrame:
-    """Return the 1992–93 clubs, with approximate dates for that season."""
+    """Return the 1992–93 clubs, with the season's first and last matchday as their dates."""
     return pd.DataFrame(
         {
             "club": FOUNDING_CLUBS_1992,
