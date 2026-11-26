@@ -32,7 +32,14 @@ Add new ones at the top; when one is decided, note the answer and the date.
   - Spells that cross two seasons only get the season Wikipedia lists, so they are undercounted
     (Mark Hughes, Southampton 2018).
 
-  Options, to decide together:
+  **Decided 2026-11-25: option (b).** Premier League time now comes from the match data
+  (football-data.co.uk). See `premier_league.py`. The Years-in-League labels are no longer used.
+  **Revised the same day:** summer breaks count when the club is in the Premier League both before
+  and after them, so a manager who stays through the summer keeps the days. Promotion and
+  relegation summers don't count. A spell's Premier League days therefore run to the end of
+  the club's last season in the league, not to its last match of that season.
+
+  Options that were considered:
   - **(a)** Read single years as the season that ends in that year. This fixes about 12 known
     cases but is still a guess for some rows.
   - **(b)** Use a separate table of which clubs were in the Premier League in each season. This

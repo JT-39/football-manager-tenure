@@ -25,8 +25,9 @@ from loguru import logger
 from lxml import html
 import pandas as pd
 
-from manager_tenure.config import RAW_DATA_DIR, SPELLS_FILE
+from manager_tenure.config import PREMIER_LEAGUE_SEASONS_FILE, RAW_DATA_DIR, SPELLS_FILE
 from manager_tenure.dataset import find_latest_snapshot, metadata_path
+from manager_tenure.premier_league import league_periods
 from manager_tenure.schema import SPELLS_SCHEMA
 
 # The symbols Wikipedia puts after a manager's name (see the key at the top of
@@ -65,20 +66,18 @@ def read_spells_table(html_path: Path) -> pd.DataFrame:
 def tidy_columns(spells: pd.DataFrame) -> pd.DataFrame:
     """Rename columns to snake_case and drop the ones we don't use.
 
-    Keeps: name, club, from, until, duration_days, years_in_league (used by
-    add_tenure to work out Premier League time), and nationality (added by
+    Keeps: name, club, from, until, duration_days, and nationality (added by
     main() from the flag images before this step runs).
-    Drops: "Nat." (empty, pandas can't read flag images) and "Ref." (citation
+    Drops: "Nat." (empty, pandas can't read flag images), "Years in League"
+    (Wikipedia's season labels, which are not reliable enough: Premier League
+    time now comes from match data, see premier_league.py), and "Ref." (citation
     numbers).
-
-    clean_names() comes from the pyjanitor package. It only exists because
-    "import janitor" runs at the top of this file.
     """
     missing = [col for col in TABLE_COLUMNS_TO_TIDY if col not in spells.columns]
     if missing:
         raise KeyError(f"Wikipedia table is missing expected columns: {missing}")
 
-    spells = spells.drop(columns=["Nat.", "Ref."])
+    spells = spells.drop(columns=["Nat.", "Years in League", "Ref."])
     spells = spells.clean_names(strip_underscores=True)
 
     return spells
@@ -123,38 +122,6 @@ def parse_dates(spells: pd.DataFrame, as_of: date) -> pd.DataFrame:
     return spells.drop(columns=["from", "until"])
 
 
-def parse_league_seasons(text: str, as_of: date) -> list[tuple[pd.Timestamp, pd.Timestamp]]:
-    """Turn a "Years in League" cell into the date ranges a club was in the Premier League.
-
-    Wikipedia lists seasons by their start year, with ranges that leave out the
-    end year:
-        "1992–1995"       seasons 1992, 1993 and 1994
-        "2002 2003–2004"  seasons 2002 and 2003
-        "2025–"           the 2025 season, still running at the snapshot date
-
-    A season starting in year y runs from 1 August y to 1 August y+1.
-    """
-    seasons = []
-    for token in text.split():
-        if "–" not in token:  # a single season, e.g. "2002"
-            first_year = int(token)
-            last_year = first_year + 1
-        else:
-            first_text, last_text = token.split("–")
-            first_year = int(first_text)
-            # A range such as "1992–1995" ends before 1995. An open range such
-            # as "2025–" has no end year: the season is still running.
-            last_year = int(last_text) if last_text else None
-
-        start = pd.Timestamp(year=first_year, month=8, day=1)
-        if last_year is None:
-            end = pd.Timestamp(as_of) + pd.Timedelta(days=1)
-        else:
-            end = pd.Timestamp(year=last_year, month=8, day=1)
-        seasons.append((start, end))
-    return seasons
-
-
 def premier_league_days(
     start: pd.Timestamp, end: pd.Timestamp, seasons: list[tuple[pd.Timestamp, pd.Timestamp]]
 ) -> int:
@@ -168,28 +135,34 @@ def premier_league_days(
     return days
 
 
-def add_tenure(spells: pd.DataFrame, as_of: date) -> pd.DataFrame:
+def add_tenure(spells: pd.DataFrame, memberships: pd.DataFrame) -> pd.DataFrame:
     """Add two measures of how long each spell lasted, in days.
 
     - tenure_days: total time in charge, from start_date to end_date, including
       any time before the Premier League existed or while the club was in a
       lower division.
     - pl_tenure_days: only the days that fall in the club's Premier League
-      seasons (from the "Years in League" column). This is the number to use
-      when comparing managers across eras.
-
-    The years_in_league column is dropped at the end, since it has been used.
+      seasons, from the match-based membership table (premier_league.py). This is
+      the number to use when comparing managers across eras.
     """
     spells = spells.copy()
     # Subtracting two dates gives a duration; .dt.days turns it into whole days.
     spells["tenure_days"] = (spells["end_date"] - spells["start_date"]).dt.days
+    periods = league_periods(memberships)
     spells["pl_tenure_days"] = [
-        premier_league_days(
-            row.start_date, row.end_date, parse_league_seasons(row.years_in_league, as_of)
-        )
+        premier_league_days_for_spell(row.club, row.start_date, row.end_date, periods)
         for row in spells.itertuples()
     ]
-    return spells.drop(columns=["years_in_league"])
+    return spells
+
+
+def premier_league_days_for_spell(
+    club: str, start: pd.Timestamp, end: pd.Timestamp, memberships: pd.DataFrame
+) -> int:
+    """Count the days of one spell that fall in the club's Premier League seasons."""
+    club_seasons = memberships[memberships["club"] == club]
+    seasons = list(zip(club_seasons["start_date"], club_seasons["end_date"], strict=True))
+    return premier_league_days(start, end, seasons)
 
 
 def read_nationalities(html_path: Path) -> list[str]:
@@ -240,7 +213,7 @@ def main(raw_dir: Path = RAW_DATA_DIR, output_path: Path = SPELLS_FILE) -> None:
         spells.pipe(tidy_columns)
         .pipe(flag_caretakers)
         .pipe(parse_dates, as_of=snapshot_date(html_path))
-        .pipe(add_tenure, as_of=snapshot_date(html_path))
+        .pipe(add_tenure, memberships=pd.read_parquet(PREMIER_LEAGUE_SEASONS_FILE))
     )
     spells["snapshot_date"] = pd.Timestamp(snapshot_date(html_path))
 
