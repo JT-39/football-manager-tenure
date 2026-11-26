@@ -3,6 +3,18 @@
 Questions that need the project owner's decision. Nobody should choose these alone.
 Add new ones at the top; when one is decided, note the answer and the date.
 
+## Added 2026-11-26 (results)
+
+9. **1992–93 results are missing.** football-data.co.uk has no file for that season, so its
+   matches are not in the results. Ferguson's 768 league matches exclude it, and so do all
+   other 1992–93 matches. Options: take the 1992–93 results from another source (e.g. the
+   season's Wikipedia fixtures), or accept the gap and say so in the analysis.
+
+10. **11 club-matches have no manager.** Each sits in a gap between two spells in the
+    Wikipedia table, where the dates don't meet (e.g. Southampton, 15 January 1994, between
+    Branfoot's and Ball's spells). They're left unattributed rather than guessed. Option: assign
+    gaps to the manager who was in charge before or after, once we have checked each one.
+
 ## Added 2026-11-23 (milestone 1b)
 
 8. **Our tenure vs Wikipedia's "Duration (days)".** About 4% of finished spells disagree,
