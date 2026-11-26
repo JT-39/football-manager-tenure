@@ -66,7 +66,7 @@ FOOTBALL_DATA_TO_WIKIPEDIA: dict[str, str] = {
 
 # The 22 clubs in the first Premier League season, 1992–93. football-data.co.uk
 # has no file for that season, so it is entered here. Source: the 1992–93 FA
-# Premier League article on Wikipedia.
+# Premier League article on Wikipedia. (Swindon Town joined in 1993–94, not 1992–93.)
 FOUNDING_CLUBS_1992: list[str] = [
     "Arsenal",
     "Aston Villa",
@@ -80,6 +80,7 @@ FOUNDING_CLUBS_1992: list[str] = [
     "Liverpool",
     "Manchester City",
     "Manchester United",
+    "Middlesbrough",
     "Norwich City",
     "Nottingham Forest",
     "Oldham Athletic",
@@ -87,7 +88,6 @@ FOUNDING_CLUBS_1992: list[str] = [
     "Sheffield United",
     "Sheffield Wednesday",
     "Southampton",
-    "Swindon Town",
     "Tottenham Hotspur",
     "Wimbledon",
 ]
